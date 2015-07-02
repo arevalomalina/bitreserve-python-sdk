@@ -14,3 +14,17 @@ class Card(base_model.BaseModel):
           transactions.append(transaction.Transaction(self.client, txn_dict))
 
       return transactions
+
+    def create_transaction(self, destination, amount, currency):
+      txn_dict = {'destination':destination,
+                  'denomination':{'amount':amount, 'currency':currency}}
+      response = self.client.post('/me/cards/%s/transactions' % self.id, txn_dict)
+
+
+      return transaction.Transaction(self.client, response)
+
+    def update(self, params):
+      response = self.client.patch('/me/cards/%s' % self.id, params)
+      self.update_fields(response)
+
+      return self

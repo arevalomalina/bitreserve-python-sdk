@@ -269,3 +269,21 @@ class BitreserveClient(object):
 
         data = json.loads(response.data)
         return data
+
+    def patch(self, uri, params, include_version=True):
+        """
+        """
+        if include_version:
+            uri = self._build_url(uri)
+
+        url = 'https://' + self.host + uri
+
+        # You're ready to make verified HTTPS requests.
+        try:
+            response = self.http.request_encode_body('PATCH', url, params, self.headers, False)
+        except urllib3.exceptions.SSLError as e:
+            # Handle incorrect certificate error.
+            print "Failed certificate check"
+
+        data = json.loads(response.data)
+        return data

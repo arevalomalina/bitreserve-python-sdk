@@ -16,6 +16,16 @@ class User(base_model.BaseModel):
 
       return cards
 
+    def get_cards_by_currency(currency):
+      response = self.client.get('/me/cards/')
+      self.update_fields(response)
+      cards = []
+      for card_dict in response:
+        if card_dict['currency'] == currency:
+          cards.append(card.Card(self.client, card_dict))
+
+      return cards
+
     def get_contacts(self):
         response = self.client.get('/me/contacts')
 
@@ -24,6 +34,61 @@ class User(base_model.BaseModel):
             contacts.append(contact.Contact(self.client, contact_dict))
 
         return contacts
+
+    def get_balances(self):
+      response = self.client.get('/me')
+      self.update_fields(response)
+
+      return self.balances['currencies']
+
+    def get_balance_by_currency(self, currency):
+      response = self.client.get('/me')
+      self.update_fields(response)
+      for balance in self.balances['currencies']:
+        if balance['currency'] == currency:
+
+          return balance['currency']
+
+    def get_phones(self):
+      response = self.client.get('/me/phones')
+      self.phones = response
+
+      return self.phones
+
+    def get_settings(self):
+      response = self.client.get('/me')
+      self.update_fields(response)
+
+      return self.settings
+
+    def get_total_balance(self):
+      response = self.client.get('/me')
+      self.update_fields(response)
+      balance_dict = {'amount':self.balances['total'],
+                      'currency':self.settings['currency']}
+
+      return balance_dict
+
+    def get_transactions(self):
+      response = self.client.get('/me/transactions')
+      transactions = []
+      for txn_dict in response:
+          transactions.append(transaction.Transaction(self.client, txn_dict))
+
+      return transactions
+
+    def create_card(self, label, currency):
+      response = self.client.post('/me/cards', {'label':label, 'currency':currency})
+
+      return card.Card(self.client, response)
+
+    def update(self):
+      response = self.client.get('/me')
+      self.update_fields(response)
+
+      return self
+
+
 
     def __init__(self, client, data):
       self.country = None
